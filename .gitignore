@@ -2,4 +2,4 @@
 node_modules
 
 # Database
-tmp/app.db
+db/app.db
