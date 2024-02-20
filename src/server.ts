@@ -1,11 +1,17 @@
 import fastify from 'fastify'
-import { knex } from './database'
-import crypto from 'node:crypto'
 import { env } from './env'
 import { dailyDietRoutes } from './routes/dailyDietRoutes'
+import cookie from '@fastify/cookie'
 
 const app = fastify()
-app.register(dailyDietRoutes)
+app.register(dailyDietRoutes, {
+  prefix: 'feeds',
+})
+
+app.register(cookie, {
+  secret: 'polls-app-nlw',
+  hook: 'onRequest',
+})
 
 app
   .listen({
