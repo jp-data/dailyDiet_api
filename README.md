@@ -3,7 +3,7 @@ Uma API para controle de dieta diária
 
 ## Requisitos funcionais
 
-- [] Será possível criar um usuário
+- [Ok] Será possível criar um usuário
 - [] Será possível identificar o usuário entre as requisições
 - [] Será possível registrar uma refeição
 - [] Será possível editar uma refeição

@@ -32,7 +32,15 @@ export async function dailyDietRoutes(app: FastifyInstance) {
       email,
       session_id: sessionId,
     })
-
     return res.status(201).send()
   })
+
+  // listagem de usuários
+  app.get('/', async () => {
+    const feeds = await knex('users').select('*')
+
+    return feeds
+  })
+
+  //
 }
