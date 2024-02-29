@@ -1,4 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify'
+import { knex } from '../database'
 
 export async function checkSessionIdExists(
   request: FastifyRequest,
@@ -23,5 +24,6 @@ export async function checkSessionIdExists(
       error: 'Unauthorized',
     })
   }
+
   request.user = user
 }

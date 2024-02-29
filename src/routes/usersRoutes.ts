@@ -1,13 +1,13 @@
 import { FastifyInstance } from 'fastify'
 import { knex } from '../database'
 import { z } from 'zod'
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 
-export async function dailyDietRoutes(app: FastifyInstance) {
+export async function userRoutes(app: FastifyInstance) {
   // cadastro de usuário
   app.post('/', async (req, res) => {
     const createFeedBodySchema = z.object({
-      email: z.string(),
+      email: z.string().email(),
       name: z.string(),
     })
 
@@ -26,6 +26,12 @@ export async function dailyDietRoutes(app: FastifyInstance) {
 
     const { email, name } = createFeedBodySchema.parse(req.body)
 
+    const userByEmail = await knex('users').where({ email }).first()
+
+    if (userByEmail) {
+      return res.status(400).send({ message: 'User already exists' })
+    }
+
     await knex('users').insert({
       id: randomUUID(),
       name,
@@ -41,6 +47,4 @@ export async function dailyDietRoutes(app: FastifyInstance) {
 
     return feeds
   })
-
-  //
 }
