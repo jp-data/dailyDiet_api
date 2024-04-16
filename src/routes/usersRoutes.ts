@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { randomUUID } from 'node:crypto'
 
 export async function userRoutes(app: FastifyInstance) {
-  // cadastro de usuário
+  // user register
   app.post('/', async (req, res) => {
     const createFeedBodySchema = z.object({
       email: z.string().email(),
@@ -19,7 +19,6 @@ export async function userRoutes(app: FastifyInstance) {
       res.setCookie('sessionId', sessionId, {
         path: '/',
         maxAge: 60 * 60 * 24 * 30,
-        signed: true,
         httpOnly: true,
       })
     }
@@ -43,8 +42,8 @@ export async function userRoutes(app: FastifyInstance) {
 
   // listagem de usuários
   app.get('/', async () => {
-    const feeds = await knex('users').select('*')
+    const users = await knex('users').select('*')
 
-    return feeds
+    return users
   })
 }

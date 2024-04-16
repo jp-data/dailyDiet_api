@@ -16,7 +16,7 @@ export async function mealsRoutes(app: FastifyInstance) {
       const insertFeedBodySchema = z.object({
         meal: z.string(),
         description: z.string(),
-        dateMeal: z.coerce.date(),
+        dateMeal: z.coerce.date().nullable(),
         onDiet: z.coerce.boolean(),
       })
 
@@ -27,11 +27,18 @@ export async function mealsRoutes(app: FastifyInstance) {
         id: randomUUID(),
         meal,
         description,
-        meal_date: dateMeal.getTime(),
+        meal_date: dateMeal?.getTime(),
         on_diet: onDiet,
+        user_id: req.user?.id,
       })
 
       return res.status(201).send()
     },
   )
+
+  app.get('/', async () => {
+    const feeds = await knex('meals').select('*')
+
+    return feeds
+  })
 }
