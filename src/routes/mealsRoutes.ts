@@ -73,4 +73,7 @@ export async function mealsRoutes(app: FastifyInstance) {
       return { meals }
     },
   )
+
+  // viewing a single meal
+  
 }
