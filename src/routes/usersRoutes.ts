@@ -40,7 +40,7 @@ export async function userRoutes(app: FastifyInstance) {
     return res.status(201).send()
   })
 
-  // listagem de usuários
+  // list of users
   app.get('/', async () => {
     const users = await knex('users').select('*')
 
