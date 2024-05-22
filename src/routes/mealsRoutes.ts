@@ -18,7 +18,7 @@ export async function mealsRoutes(app: FastifyInstance) {
         meal: z.string(),
         description: z.string(),
         dateMeal: z.coerce.date().optional(),
-        onDiet: z.coerce.boolean(),
+        onDiet: z.boolean(),
       })
 
       const { meal, description, dateMeal, onDiet } =
@@ -44,36 +44,49 @@ export async function mealsRoutes(app: FastifyInstance) {
         user_id: req.user?.id,
       })
 
-      return res.status(201).send()
+      return res.status(201).send(meal)
     },
   )
 
-  app.get('/', async () => {
-    const feeds = await knex('meals').select('*')
-
-    return feeds
-  })
-
-  //  users meals list
+  // viewing a single meal
   app.get(
-    '/:id',
+    '/meals/:mealId',
     {
       preHandler: [checkSessionIdExists],
     },
 
     async (req, res) => {
       const paramsUserValidator = z.object({
-        id: z.string().uuid(),
+        mealId: z.string().uuid(),
       })
 
-      const { id } = paramsUserValidator.parse(req.params)
+      const { mealId } = paramsUserValidator.parse(req.params)
 
-      const meals = await knex('meals').select('*').where('user_id', id)
+      const meal = await knex('meals').where({ id: mealId }).first()
 
-      return { meals }
+      if (!meal) {
+        return res.status(404).send({ error: 'Meal not found' })
+      }
+
+      return res.send({ meal })
     },
   )
 
-  // viewing a single meal
-  
+  // viewing all meals of an specific user
+  app.get(
+    '/:userId',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (req, res) => {
+      const userIdValidator = z.object({
+        userId: z.string().uuid(),
+      })
+
+      const { userId } = userIdValidator.parse(req.params)
+      const meals = await knex('meals').where({ user_id: userId }).first()
+
+      return res.send({ meals })
+    },
+  )
 }

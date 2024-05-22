@@ -1,27 +1,15 @@
-import { FastifyInstance } from 'fastify'
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { knex } from '../database'
+import { randomUUID } from 'crypto'
 import { z } from 'zod'
-import { randomUUID } from 'node:crypto'
 
 export async function userRoutes(app: FastifyInstance) {
-  // user register
-  app.post('/', async (req, res) => {
+  // register of users
+  app.post('/', async (req: FastifyRequest, res: FastifyReply) => {
     const createFeedBodySchema = z.object({
       email: z.string().email(),
       name: z.string(),
     })
-
-    let sessionId = req.cookies.sessionId
-
-    if (!sessionId) {
-      sessionId = randomUUID()
-
-      res.setCookie('sessionId', sessionId, {
-        path: '/',
-        maxAge: 60 * 60 * 24 * 30,
-        httpOnly: true,
-      })
-    }
 
     const { email, name } = createFeedBodySchema.parse(req.body)
 
@@ -31,12 +19,20 @@ export async function userRoutes(app: FastifyInstance) {
       return res.status(400).send({ message: 'User already exists' })
     }
 
+    const sessionId = randomUUID()
+
     await knex('users').insert({
       id: randomUUID(),
       name,
       email,
       session_id: sessionId,
     })
+
+    res.setCookie('sessionId', sessionId, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30,
+    })
+
     return res.status(201).send()
   })
 

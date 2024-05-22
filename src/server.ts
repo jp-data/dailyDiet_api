@@ -6,10 +6,7 @@ import cookie from '@fastify/cookie'
 
 const app = fastify()
 
-app.register(cookie, {
-  secret: 'polls-app-nlw',
-  hook: 'onRequest',
-})
+app.register(cookie)
 
 app.register(mealsRoutes, {
   prefix: 'feeds',
