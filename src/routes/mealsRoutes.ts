@@ -44,7 +44,7 @@ export async function mealsRoutes(app: FastifyInstance) {
         user_id: req.user?.id,
       })
 
-      return res.status(201).send(meal)
+      return res.status(201).send()
     },
   )
 
@@ -84,9 +84,79 @@ export async function mealsRoutes(app: FastifyInstance) {
       })
 
       const { userId } = userIdValidator.parse(req.params)
-      const meals = await knex('meals').where({ user_id: userId }).first()
+      const meals = await knex('meals').where({ user_id: userId })
 
       return res.send({ meals })
+    },
+  )
+
+  // updating one meal
+  app.put(
+    '/update/:mealId',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+
+    async (req, res) => {
+      const paramsSchema = z.object({ mealId: z.string().uuid() })
+      const { mealId } = paramsSchema.parse(req.params)
+
+      const updateBodySchema = z.object({
+        meal: z.string().optional(),
+        description: z.string().optional(),
+        dateMeal: z.coerce.date().optional(),
+        onDiet: z.boolean().optional(),
+      })
+
+      const { meal, description, dateMeal, onDiet } = updateBodySchema.parse(
+        req.body,
+      )
+
+      // handling meal date format
+      let mealDate
+
+      if (dateMeal) {
+        const dateMealFormat = dayjs(dateMeal).format()
+        mealDate = dateMealFormat
+      } else {
+        const now = dayjs()
+        mealDate = now.format()
+      }
+
+      const mealUpdate = await knex('meals').where({ id: mealId }).first()
+
+      if (!mealUpdate) {
+        return res.status(404).send({ error: 'Meal not exist!' })
+      }
+
+      await knex('meals').where({ id: mealId }).update({
+        meal,
+        description,
+        meal_date: mealDate,
+        on_diet: onDiet,
+      })
+
+      return res.status(204).send()
+    },
+  )
+
+  // delete one meal
+  app.delete(
+    '/delete/:mealId',
+    { preHandler: [checkSessionIdExists] },
+    async (req, res) => {
+      const paramsIdSchema = z.object({ mealId: z.string().uuid() })
+      const { mealId } = paramsIdSchema.parse(req.params)
+
+      const meal = await knex('meals').where({ id: mealId }).first()
+
+      if (!meal) {
+        return res.status(401).send({ error: 'Meal not found!' })
+      }
+
+      await knex('meals').where({ id: mealId }).delete()
+
+      return res.status(204).send()
     },
   )
 }

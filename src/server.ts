@@ -4,7 +4,7 @@ import { mealsRoutes } from './routes/mealsRoutes'
 import { userRoutes } from './routes/usersRoutes'
 import cookie from '@fastify/cookie'
 
-const app = fastify()
+export const app = fastify()
 
 app.register(cookie)
 
