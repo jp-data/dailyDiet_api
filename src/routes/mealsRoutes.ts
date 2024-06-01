@@ -159,4 +159,20 @@ export async function mealsRoutes(app: FastifyInstance) {
       return res.status(204).send()
     },
   )
+
+  // metrics
+  app.get(
+    '/:userId/metrics',
+    { preHandler: [checkSessionIdExists] },
+    async (req, res) => {
+      const paramsUserIdSchema = z.object({ userId: z.string().uuid() })
+      const { userId } = paramsUserIdSchema.parse(req.params)
+
+      const totalMeals = await knex('meals')
+        .where({ user_id: userId })
+        .groupBy('meal')
+
+      return res.send({ totalMeals: totalMeals.length })
+    },
+  )
 }
