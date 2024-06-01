@@ -171,14 +171,35 @@ export async function mealsRoutes(app: FastifyInstance) {
       const totalMeals = await knex('meals')
         .where({ user_id: userId })
         .groupBy('meal')
+        .orderBy('meal_date', 'asc')
 
       const mealsOnDiet = await knex('meals')
         .where({ user_id: userId })
         .andWhere('on_diet', '1')
 
+      const mealsNotInDiet = await knex('meals')
+        .where({ user_id: userId })
+        .andWhere('on_diet', '0')
+
+      let bestSequence = 0
+      let currentSequence = 0
+
+      totalMeals.forEach((meal) => {
+        if (meal.on_diet) {
+          currentSequence += 1
+          if (currentSequence > bestSequence) {
+            bestSequence = currentSequence
+          }
+        } else {
+          currentSequence = 0
+        }
+      })
+
       return res.send({
         totalMeals: totalMeals.length,
         mealsOnDiet: mealsOnDiet.length,
+        mealsNotInDiet: mealsNotInDiet.length,
+        bestSequence,
       })
     },
   )
