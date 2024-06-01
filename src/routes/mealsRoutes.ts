@@ -172,7 +172,14 @@ export async function mealsRoutes(app: FastifyInstance) {
         .where({ user_id: userId })
         .groupBy('meal')
 
-      return res.send({ totalMeals: totalMeals.length })
+      const mealsOnDiet = await knex('meals')
+        .where({ user_id: userId })
+        .andWhere('on_diet', '1')
+
+      return res.send({
+        totalMeals: totalMeals.length,
+        mealsOnDiet: mealsOnDiet.length,
+      })
     },
   )
 }
