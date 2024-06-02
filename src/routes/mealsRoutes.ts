@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
 import { randomUUID } from 'node:crypto'
 import dayjs from 'dayjs'
+import { BadRequest } from './_errors/bad-request'
 
 export async function mealsRoutes(app: FastifyInstance) {
   // register of meals
@@ -65,7 +66,7 @@ export async function mealsRoutes(app: FastifyInstance) {
       const meal = await knex('meals').where({ id: mealId }).first()
 
       if (!meal) {
-        return res.status(404).send({ error: 'Meal not found' })
+        throw new BadRequest('Meal not found!')
       }
 
       return res.send({ meal })
@@ -126,7 +127,7 @@ export async function mealsRoutes(app: FastifyInstance) {
       const mealUpdate = await knex('meals').where({ id: mealId }).first()
 
       if (!mealUpdate) {
-        return res.status(404).send({ error: 'Meal not exist!' })
+        throw new BadRequest('Meal not found!')
       }
 
       await knex('meals').where({ id: mealId }).update({
@@ -151,7 +152,7 @@ export async function mealsRoutes(app: FastifyInstance) {
       const meal = await knex('meals').where({ id: mealId }).first()
 
       if (!meal) {
-        return res.status(401).send({ error: 'Meal not found!' })
+        throw new BadRequest('Meal not found!')
       }
 
       await knex('meals').where({ id: mealId }).delete()

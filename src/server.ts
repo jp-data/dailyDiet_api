@@ -3,6 +3,7 @@ import { env } from './env'
 import { mealsRoutes } from './routes/mealsRoutes'
 import { userRoutes } from './routes/usersRoutes'
 import cookie from '@fastify/cookie'
+import { errorHandler } from './error-handler'
 
 export const app = fastify()
 
@@ -15,6 +16,8 @@ app.register(mealsRoutes, {
 app.register(userRoutes, {
   prefix: 'users',
 })
+
+app.setErrorHandler(errorHandler)
 
 app
   .listen({

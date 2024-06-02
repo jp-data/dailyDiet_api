@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify'
 import { knex } from '../database'
 import { randomUUID } from 'crypto'
 import { z } from 'zod'
+import { BadRequest } from './_errors/bad-request'
 
 export async function userRoutes(app: FastifyInstance) {
   // register of users
@@ -27,7 +28,7 @@ export async function userRoutes(app: FastifyInstance) {
     const userByEmail = await knex('users').where({ email }).first()
 
     if (userByEmail) {
-      return res.status(400).send({ message: 'User already exists' })
+      throw new BadRequest('Email already exists!')
     }
 
     await knex('users').insert({
