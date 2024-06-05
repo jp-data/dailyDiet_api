@@ -51,7 +51,7 @@ export async function mealsRoutes(app: FastifyInstance) {
 
   // viewing a single meal
   app.get(
-    '/meals/:mealId',
+    '/:mealId',
     {
       preHandler: [checkSessionIdExists],
     },
@@ -75,7 +75,7 @@ export async function mealsRoutes(app: FastifyInstance) {
 
   // viewing all meals of an specific user
   app.get(
-    '/:userId',
+    '/view/:userId',
     {
       preHandler: [checkSessionIdExists],
     },
@@ -93,7 +93,7 @@ export async function mealsRoutes(app: FastifyInstance) {
 
   // updating one meal
   app.put(
-    '/update/:mealId',
+    '/:mealId',
     {
       preHandler: [checkSessionIdExists],
     },
@@ -143,7 +143,7 @@ export async function mealsRoutes(app: FastifyInstance) {
 
   // delete one meal
   app.delete(
-    '/delete/:mealId',
+    '/:mealId',
     { preHandler: [checkSessionIdExists] },
     async (req, res) => {
       const paramsIdSchema = z.object({ mealId: z.string().uuid() })
