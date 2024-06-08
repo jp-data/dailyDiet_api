@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify'
+import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { knex } from '../database'
 import { z } from 'zod'
 import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
@@ -8,22 +9,28 @@ import { BadRequest } from './_errors/bad-request'
 
 export async function mealsRoutes(app: FastifyInstance) {
   // register of meals
-  app.post(
+  app.withTypeProvider<ZodTypeProvider>().post(
     '/',
     {
       preHandler: [checkSessionIdExists],
+      schema: {
+        summary: 'Register of meals',
+        tags: ['Meals'],
+        body: z.object({
+          meal: z.string(),
+          description: z.string(),
+          dateMeal: z.coerce.date().optional(),
+          onDiet: z.boolean(),
+        }),
+        response: {
+          201: z.object({
+            id: z.string().uuid(),
+          }),
+        },
+      },
     },
-
     async (req, res) => {
-      const insertFeedBodySchema = z.object({
-        meal: z.string(),
-        description: z.string(),
-        dateMeal: z.coerce.date().optional(),
-        onDiet: z.boolean(),
-      })
-
-      const { meal, description, dateMeal, onDiet } =
-        insertFeedBodySchema.parse(req.body)
+      const { meal, description, dateMeal, onDiet } = req.body
 
       // handling meal date format
       let mealDate
@@ -54,6 +61,21 @@ export async function mealsRoutes(app: FastifyInstance) {
     '/:mealId',
     {
       preHandler: [checkSessionIdExists],
+      schema: {
+        summary: 'View an specific meal',
+        tags: ['Meals'],
+        params: z.object({
+          mealId: z.string().uuid(),
+        }),
+        response: {
+          200: z.object({
+            meal: z.string(),
+            description: z.string(),
+            dateMeal: z.coerce.date().optional(),
+            onDiet: z.boolean(),
+          }),
+        },
+      },
     },
 
     async (req, res) => {
@@ -78,6 +100,13 @@ export async function mealsRoutes(app: FastifyInstance) {
     '/view/:userId',
     {
       preHandler: [checkSessionIdExists],
+      schema: {
+        summary: 'Viewing all meals of an specific user',
+        tags: ['Meals'],
+        params: z.object({
+          userId: z.string().uuid(),
+        }),
+      },
     },
     async (req, res) => {
       const userIdValidator = z.object({
@@ -96,22 +125,23 @@ export async function mealsRoutes(app: FastifyInstance) {
     '/:mealId',
     {
       preHandler: [checkSessionIdExists],
+      schema: {
+        summary: 'Update previously recorded meals',
+        tags: ['Meals'],
+        params: z.object({
+          mealId: z.string().uuid(),
+        }),
+        body: z.object({
+          meal: z.string().optional(),
+          description: z.string().optional(),
+          dateMeal: z.coerce.date().optional(),
+          onDiet: z.boolean().optional(),
+        }),
+      },
     },
-
     async (req, res) => {
-      const paramsSchema = z.object({ mealId: z.string().uuid() })
-      const { mealId } = paramsSchema.parse(req.params)
-
-      const updateBodySchema = z.object({
-        meal: z.string().optional(),
-        description: z.string().optional(),
-        dateMeal: z.coerce.date().optional(),
-        onDiet: z.boolean().optional(),
-      })
-
-      const { meal, description, dateMeal, onDiet } = updateBodySchema.parse(
-        req.body,
-      )
+      const { mealId } = req.params
+      const { meal, description, dateMeal, onDiet } = req.body
 
       // handling meal date format
       let mealDate
