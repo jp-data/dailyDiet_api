@@ -30,7 +30,14 @@ export async function mealsRoutes(app: FastifyInstance) {
       },
     },
     async (req, res) => {
-      const { meal, description, dateMeal, onDiet } = req.body
+      const mealRegisterBodySchema = z.object({
+        meal: z.string(),
+        description: z.string(),
+        dateMeal: z.coerce.date().optional(),
+        onDiet: z.boolean(),
+      })
+      const { meal, description, dateMeal, onDiet } =
+        mealRegisterBodySchema.parse(req.body)
 
       // handling meal date format
       let mealDate
@@ -140,8 +147,18 @@ export async function mealsRoutes(app: FastifyInstance) {
       },
     },
     async (req, res) => {
-      const { mealId } = req.params
-      const { meal, description, dateMeal, onDiet } = req.body
+      const mealsIdParamsSchema = z.object({ mealId: z.string().uuid() })
+      const { mealId } = mealsIdParamsSchema.parse(req.params)
+
+      const mealUpdatingBodySchema = z.object({
+        meal: z.string().optional(),
+        description: z.string().optional(),
+        dateMeal: z.coerce.date().optional(),
+        onDiet: z.boolean().optional(),
+      })
+
+      const { meal, description, dateMeal, onDiet } =
+        mealUpdatingBodySchema.parse(req.body)
 
       // handling meal date format
       let mealDate
@@ -174,10 +191,19 @@ export async function mealsRoutes(app: FastifyInstance) {
   // delete one meal
   app.delete(
     '/:mealId',
-    { preHandler: [checkSessionIdExists] },
+    {
+      preHandler: [checkSessionIdExists],
+      schema: {
+        summary: 'Delete one register of meal',
+        tags: ['Meals'],
+        params: z.object({
+          mealId: z.string().uuid(),
+        }),
+      },
+    },
     async (req, res) => {
-      const paramsIdSchema = z.object({ mealId: z.string().uuid() })
-      const { mealId } = paramsIdSchema.parse(req.params)
+      const mealsIdParamsSchema = z.object({ mealId: z.string().uuid() })
+      const { mealId } = mealsIdParamsSchema.parse(req.params)
 
       const meal = await knex('meals').where({ id: mealId }).first()
 
@@ -194,7 +220,24 @@ export async function mealsRoutes(app: FastifyInstance) {
   // metrics
   app.get(
     '/:userId/metrics',
-    { preHandler: [checkSessionIdExists] },
+    {
+      preHandler: [checkSessionIdExists],
+      schema: {
+        summary: 'Metrics about a specific users meals',
+        tags: ['User'],
+        params: z.object({
+          userId: z.string().uuid(),
+        }),
+        response: {
+          200: z.object({
+            totalMeals: z.number(),
+            mealsOnDiet: z.number(),
+            mealsNotInDiet: z.number(),
+            bestSequence: z.number(),
+          }),
+        },
+      },
+    },
     async (req, res) => {
       const paramsUserIdSchema = z.object({ userId: z.string().uuid() })
       const { userId } = paramsUserIdSchema.parse(req.params)
