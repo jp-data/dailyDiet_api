@@ -35,7 +35,7 @@ export async function userRoutes(app: FastifyInstance) {
 
         res.setCookie('sessionId', sessionId, {
           path: '/',
-          maxAge: 60 * 60 * 24 * 30,
+          maxAge: 1000 * 60 * 60 * 24 * 7,
         })
       }
       const userByEmail = await knex('users').where({ email }).first()
@@ -44,14 +44,16 @@ export async function userRoutes(app: FastifyInstance) {
         throw new BadRequest('Email already exists!')
       }
 
-      await knex('users').insert({
+      const newUser = {
         id: randomUUID(),
         name,
         email,
         session_id: sessionId,
-      })
+      }
 
-      return res.status(201).send()
+      await knex('users').insert(newUser)
+
+      return res.status(201).send({ id: newUser.id })
     },
   )
 }
