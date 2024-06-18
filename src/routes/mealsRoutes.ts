@@ -75,7 +75,7 @@ export async function mealsRoutes(app: FastifyInstance) {
           mealId: z.string().uuid(),
         }),
         response: {
-          200: z.object({
+          201: z.object({
             meal: z.string(),
             description: z.string(),
             dateMeal: z.coerce.date().optional(),
@@ -113,6 +113,14 @@ export async function mealsRoutes(app: FastifyInstance) {
         params: z.object({
           userId: z.string().uuid(),
         }),
+        response: {
+          201: z.object({
+            meal: z.string(),
+            description: z.string(),
+            dateMeal: z.coerce.date().optional(),
+            onDiet: z.boolean(),
+          }),
+        },
       },
     },
     async (req, res) => {
